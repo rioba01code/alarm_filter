@@ -1,82 +1,47 @@
-import pandas as pd
+from app.services.duplicate_filter import DuplicateFilter
+from app.services.priority_engine import PriorityEngine
+from app.services.category_engine import CategoryEngine
+from app.services.report_generator import ReportGenerator
+from app.services.correlation_engine import CorrelationEngine
 
 
 class AlarmProcessor:
 
-    def process(self, df: pd.DataFrame):
+    def process(self, df):
 
-        # Clean column names
-        df.columns = df.columns.str.strip()
+        # -----------------------------
+        # Step 1: Remove duplicate alarms
+        # -----------------------------
+        df, duplicates_removed = DuplicateFilter.remove(df)
 
-        # Fill missing values
-        df = df.fillna("Unknown")
+        # -----------------------------
+        # Step 2: Assign priority
+        # -----------------------------
+        df["Priority"] = df["Alarm"].apply(
+            PriorityEngine.classify
+        )
 
-        # Remove duplicate alarms
-        before = len(df)
+        # -----------------------------
+        # Step 3: Assign category
+        # -----------------------------
+        df["Category"] = df["Alarm"].apply(
+            CategoryEngine.classify
+        )
 
-        df = df.drop_duplicates()
+        # -----------------------------
+        # Step 4: Correlate alarms
+        # -----------------------------
+        correlations = CorrelationEngine.correlate(df)
 
-        duplicates_removed = before - len(df)
+        # -----------------------------
+        # Step 5: Generate summary report
+        # -----------------------------
+        summary = ReportGenerator.generate(
+            df,
+            duplicates_removed
+        )
 
-        # -----------------------
-        # AI Rule Engine
-        # -----------------------
-
-        def classify_priority(alarm):
-
-            alarm = str(alarm).lower()
-
-            critical_keywords = [
-                "battery",
-                "trip",
-                "dc fail",
-                "dc failure",
-                "breaker fail",
-                "transformer"
-            ]
-
-            major_keywords = [
-                "communication",
-                "protection",
-                "relay",
-                "voltage",
-                "current"
-            ]
-
-            for word in critical_keywords:
-                if word in alarm:
-                    return "Critical"
-
-            for word in major_keywords:
-                if word in alarm:
-                    return "Major"
-
-            return "Minor"
-
-        df["Priority"] = df["Alarm"].apply(classify_priority)
-
-        # -----------------------
-        # Station statistics
-        # -----------------------
-
-        stations = []
-
-        if "Station" in df.columns:
-            stations = sorted(df["Station"].unique().tolist())
-
-        summary = {
-
-            "total_alarms": len(df),
-
-            "critical": len(df[df["Priority"] == "Critical"]),
-
-            "major": len(df[df["Priority"] == "Major"]),
-
-            "minor": len(df[df["Priority"] == "Minor"]),
-
-            "duplicates_removed": duplicates_removed,
-
-            "stations": stations
-        }
-
-        return df, summary
+        # -----------------------------
+        # Step 6: Return processed data
+        # -----------------------------
+        return df, summary, correlations
