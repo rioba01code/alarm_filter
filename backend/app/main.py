@@ -16,8 +16,9 @@ origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 
-    # Replace this with your Vercel frontend URL after deployment
-    "https://your-project-name.vercel.app",
+
+  # Production frontend
+    "https://alarm-filter-2gzd.vercel.app"
 ]
 
 app.add_middleware(
