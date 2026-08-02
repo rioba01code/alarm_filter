@@ -9,26 +9,23 @@ app = FastAPI(
 )
 
 # =====================================================
-# Allow React Frontend
+# CORS Configuration
 # =====================================================
 
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+
+    # Replace this with your Vercel frontend URL after deployment
+    "https://your-project-name.vercel.app",
+]
+
 app.add_middleware(
-
     CORSMiddleware,
-
-    allow_origins=[
-
-        "http://localhost:5173",
-        "http://127.0.0.1:5173"
-
-    ],
-
+    allow_origins=origins,
     allow_credentials=True,
-
     allow_methods=["*"],
-
-    allow_headers=["*"]
-
+    allow_headers=["*"],
 )
 
 # =====================================================
@@ -38,18 +35,24 @@ app.add_middleware(
 app.include_router(router)
 
 # =====================================================
-# Home
+# Root Endpoint
 # =====================================================
 
 @app.get("/")
-def home():
-
+async def home():
     return {
-
         "status": "Running",
-
         "system": "SCADA Alarm Intelligence Platform",
+        "version": "1.0.0",
+        "message": "Backend is online."
+    }
 
-        "version": "1.0.0"
+# =====================================================
+# Health Check
+# =====================================================
 
+@app.get("/health")
+async def health():
+    return {
+        "status": "healthy"
     }
