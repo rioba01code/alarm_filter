@@ -1,72 +1,4 @@
-/*
-==========================================================
-Alarm Table Component
-
-Future Backend API
-
-GET /api/alarms/live
-
-Source:
-SCADA Historian / Utility Data Warehouse
-
-This component displays the latest alarms
-received from the SCADA system.
-==========================================================
-*/
-
-const alarms = [
-
-  {
-    id: 1,
-    time: "09:31:22",
-    substation: "Embakasi",
-    equipment: "Transformer T2",
-    alarm: "Oil Temperature High",
-    priority: "Critical",
-    status: "Unacknowledged"
-  },
-
-  {
-    id: 2,
-    time: "09:27:11",
-    substation: "Rabai",
-    equipment: "Circuit Breaker CB12",
-    alarm: "Breaker Open",
-    priority: "Major",
-    status: "Acknowledged"
-  },
-
-  {
-    id: 3,
-    time: "09:21:47",
-    substation: "Kisumu",
-    equipment: "Protection Relay",
-    alarm: "Communication Failure",
-    priority: "Minor",
-    status: "Acknowledged"
-  },
-
-  {
-    id: 4,
-    time: "09:18:08",
-    substation: "Lessos",
-    equipment: "Busbar",
-    alarm: "Voltage Low",
-    priority: "Major",
-    status: "Unacknowledged"
-  },
-
-  {
-    id: 5,
-    time: "09:11:42",
-    substation: "Olkaria",
-    equipment: "Battery Charger",
-    alarm: "DC Supply Failure",
-    priority: "Critical",
-    status: "Unacknowledged"
-  }
-
-];
+import { useDashboard } from "../context/DashboardContext";
 
 function priorityColor(priority) {
 
@@ -80,6 +12,9 @@ function priorityColor(priority) {
 
     case "Minor":
       return "bg-yellow-100 text-yellow-700";
+
+    case "Warning":
+      return "bg-blue-100 text-blue-700";
 
     default:
       return "bg-gray-100 text-gray-700";
@@ -100,11 +35,17 @@ function statusColor(status) {
 
 export default function AlarmTable() {
 
+  const { dashboard } = useDashboard();
+
+  const alarms = dashboard?.alarmTable || [];
+
   return (
 
     <div className="bg-white rounded-2xl shadow-md overflow-hidden">
 
+      {/* ============================================ */}
       {/* Header */}
+      {/* ============================================ */}
 
       <div className="flex justify-between items-center p-5 border-b">
 
@@ -118,119 +59,179 @@ export default function AlarmTable() {
 
           <p className="text-sm text-gray-500">
 
-            Latest alarms received from the SCADA system.
+            Latest processed alarms from the SCADA platform.
 
           </p>
 
         </div>
 
-        <button
+        <div className="text-sm text-gray-500">
 
-          className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg"
+          {alarms.length} alarms
 
-        >
-
-          View All
-
-        </button>
+        </div>
 
       </div>
 
-      {/* Table */}
+      {/* ============================================ */}
+      {/* Empty State */}
+      {/* ============================================ */}
 
-      <div className="overflow-x-auto">
+      {
 
-        <table className="min-w-full">
+        alarms.length === 0 && (
 
-          <thead className="bg-gray-100">
+          <div className="text-center py-16 text-gray-400">
 
-            <tr>
+            Upload a SCADA alarm file to display alarms.
 
-              <th className="text-left p-4">Time</th>
+          </div>
 
-              <th className="text-left p-4">Substation</th>
+        )
 
-              <th className="text-left p-4">Equipment</th>
+      }
 
-              <th className="text-left p-4">Alarm</th>
+      {/* ============================================ */}
+      {/* Alarm Table */}
+      {/* ============================================ */}
 
-              <th className="text-left p-4">Priority</th>
+      {
 
-              <th className="text-left p-4">Status</th>
+        alarms.length > 0 && (
 
-            </tr>
+          <div className="overflow-x-auto">
 
-          </thead>
+            <table className="min-w-full">
 
-          <tbody>
+              <thead className="bg-gray-100">
 
-            {
+                <tr>
 
-              alarms.map((alarm) => (
+                  <th className="text-left p-4">Time</th>
 
-                <tr
+                  <th className="text-left p-4">Station</th>
 
-                  key={alarm.id}
+                  <th className="text-left p-4">Device</th>
 
-                  className="border-b hover:bg-green-50 transition"
+                  <th className="text-left p-4">Alarm</th>
 
-                >
+                  <th className="text-left p-4">Priority</th>
 
-                  <td className="p-4">
+                  <th className="text-left p-4">Category</th>
 
-                    {alarm.time}
+                  <th className="text-left p-4">Assigned Team</th>
 
-                  </td>
+                  <th className="text-left p-4">Status</th>
 
-                  <td className="p-4">
-
-                    {alarm.substation}
-
-                  </td>
-
-                  <td className="p-4">
-
-                    {alarm.equipment}
-
-                  </td>
-
-                  <td className="p-4">
-
-                    {alarm.alarm}
-
-                  </td>
-
-                  <td className="p-4">
-
-                    <span
-
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${priorityColor(alarm.priority)}`}
-
-                    >
-
-                      {alarm.priority}
-
-                    </span>
-
-                  </td>
-
-                  <td className={`p-4 font-semibold ${statusColor(alarm.status)}`}>
-
-                    {alarm.status}
-
-                  </td>
+                  <th className="text-left p-4">Suppressed</th>
 
                 </tr>
 
-              ))
+              </thead>
 
-            }
+              <tbody>
 
-          </tbody>
+                {
 
-        </table>
+                  alarms.map((alarm, index) => (
 
-      </div>
+                    <tr
+
+                      key={index}
+
+                      className="border-b hover:bg-green-50 transition"
+
+                    >
+
+                      <td className="p-4">
+
+                        {alarm.Timestamp}
+
+                      </td>
+
+                      <td className="p-4">
+
+                        {alarm.Station}
+
+                      </td>
+
+                      <td className="p-4">
+
+                        {alarm.Device}
+
+                      </td>
+
+                      <td className="p-4">
+
+                        {alarm.Alarm}
+
+                      </td>
+
+                      <td className="p-4">
+
+                        <span
+
+                          className={`px-3 py-1 rounded-full text-sm font-semibold ${priorityColor(alarm.Priority)}`}
+
+                        >
+
+                          {alarm.Priority}
+
+                        </span>
+
+                      </td>
+
+                      <td className="p-4">
+
+                        {alarm.Category}
+
+                      </td>
+
+                      <td className="p-4">
+
+                        {alarm["Assigned Team"]}
+
+                      </td>
+
+                      <td
+
+                        className={`p-4 font-semibold ${statusColor(alarm.Status)}`}
+
+                      >
+
+                        {alarm.Status}
+
+                      </td>
+
+                      <td className="p-4">
+
+                        {
+
+                          alarm.Suppressed
+
+                            ? "✅"
+
+                            : "—"
+
+                        }
+
+                      </td>
+
+                    </tr>
+
+                  ))
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        )
+
+      }
 
     </div>
 

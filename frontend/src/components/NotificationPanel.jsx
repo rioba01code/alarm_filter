@@ -1,150 +1,157 @@
 import {
   AlertTriangle,
-  Bell,
+  ShieldAlert,
   CheckCircle,
-  Wrench,
-  Radio
+  Bell
 } from "lucide-react";
 
-/*
-==========================================================
+import { useDashboard } from "../context/DashboardContext";
 
-Notification Panel
+function icon(priority) {
 
-Future Backend API
+  switch (priority) {
 
-GET /api/dashboard/notifications
+    case "Critical":
+      return <AlertTriangle className="text-red-600" />;
 
-Source:
-SCADA Historian
-Utility Data Warehouse
+    case "Major":
+      return <ShieldAlert className="text-orange-600" />;
 
-Purpose:
-Display the latest operational events
-requiring operator awareness.
+    case "Minor":
+      return <Bell className="text-yellow-600" />;
 
-==========================================================
-*/
+    default:
+      return <CheckCircle className="text-green-600" />;
 
-const notifications = [
-
-  {
-    id: 1,
-    icon: <AlertTriangle className="text-red-600" />,
-    title: "Critical Alarm",
-    message: "Transformer T2 oil temperature exceeded safe limit.",
-    time: "2 min ago"
-  },
-
-  {
-    id: 2,
-    icon: <Bell className="text-orange-500" />,
-    title: "Breaker Status",
-    message: "Circuit Breaker CB12 changed to OPEN state.",
-    time: "6 min ago"
-  },
-
-  {
-    id: 3,
-    icon: <CheckCircle className="text-green-600" />,
-    title: "Alarm Acknowledged",
-    message: "Operator acknowledged communication failure.",
-    time: "12 min ago"
-  },
-
-  {
-    id: 4,
-    icon: <Radio className="text-blue-600" />,
-    title: "Communication Restored",
-    message: "RTU communication restored successfully.",
-    time: "20 min ago"
-  },
-
-  {
-    id: 5,
-    icon: <Wrench className="text-purple-600" />,
-    title: "Maintenance Reminder",
-    message: "Scheduled maintenance due for Transformer T1.",
-    time: "35 min ago"
   }
 
-];
+}
 
 export default function NotificationPanel() {
+
+  const { dashboard } = useDashboard();
+
+  const incidents = dashboard?.incidents || [];
 
   return (
 
     <div className="bg-white rounded-2xl shadow-md">
 
+      {/* ======================================= */}
       {/* Header */}
+      {/* ======================================= */}
 
       <div className="border-b px-6 py-4">
 
         <h2 className="text-xl font-bold">
 
-          Notifications
+          Active Incidents
 
         </h2>
 
         <p className="text-sm text-gray-500">
 
-          Latest operational events.
+          Generated automatically by the Alarm Intelligence Engine.
 
         </p>
 
       </div>
 
-      {/* Notification List */}
+      {/* ======================================= */}
+      {/* Empty State */}
+      {/* ======================================= */}
 
-      <div className="divide-y">
+      {
 
-        {
+        incidents.length === 0 && (
 
-          notifications.map((item) => (
+          <div className="text-center py-16 text-gray-400">
 
-            <div
+            No incidents detected.
 
-              key={item.id}
+          </div>
 
-              className="flex gap-4 px-6 py-5 hover:bg-gray-50 transition"
+        )
 
-            >
+      }
 
-              <div>
+      {/* ======================================= */}
+      {/* Incident List */}
+      {/* ======================================= */}
 
-                {item.icon}
+      {
 
-              </div>
+        incidents.length > 0 && (
 
-              <div className="flex-1">
+          <div className="divide-y">
 
-                <h3 className="font-semibold">
+            {
 
-                  {item.title}
+              incidents.map((incident, index) => (
 
-                </h3>
+                <div
 
-                <p className="text-gray-500 text-sm mt-1">
+                  key={index}
 
-                  {item.message}
+                  className="flex gap-4 px-6 py-5 hover:bg-gray-50 transition"
 
-                </p>
+                >
 
-              </div>
+                  <div>
 
-              <div className="text-xs text-gray-400 whitespace-nowrap">
+                    {icon(incident.Priority)}
 
-                {item.time}
+                  </div>
 
-              </div>
+                  <div className="flex-1">
 
-            </div>
+                    <h3 className="font-semibold">
 
-          ))
+                      {incident.Alarm}
 
-        }
+                    </h3>
 
-      </div>
+                    <p className="text-gray-500 text-sm mt-1">
+
+                      Assigned to <b>{incident.Team}</b>
+
+                    </p>
+
+                  </div>
+
+                  <div>
+
+                    <span
+
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+
+                        incident.Status === "Open"
+
+                          ? "bg-red-100 text-red-700"
+
+                          : "bg-green-100 text-green-700"
+
+                      }`}
+
+                    >
+
+                      {incident.Status}
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+              ))
+
+            }
+
+          </div>
+
+        )
+
+      }
 
     </div>
 

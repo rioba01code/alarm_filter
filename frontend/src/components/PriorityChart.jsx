@@ -1,34 +1,30 @@
+import { useDashboard } from "../context/DashboardContext";
+
 export default function PriorityChart() {
 
-  const alarms = [
+  const { dashboard } = useDashboard();
 
-    {
-      name: "Critical",
-      value: 11,
-      color: "bg-red-600"
-    },
+  const alarms = dashboard?.priorityDistribution || [];
 
-    {
-      name: "Major",
-      value: 36,
-      color: "bg-orange-500"
-    },
+  const colors = {
 
-    {
-      name: "Minor",
-      value: 77,
-      color: "bg-yellow-400"
-    },
+    Critical: "bg-red-600",
 
-    {
-      name: "Acknowledged",
-      value: 45,
-      color: "bg-green-600"
-    }
+    Major: "bg-orange-500",
 
-  ];
+    Minor: "bg-yellow-400",
 
-  const total = alarms.reduce((sum, item) => sum + item.value, 0);
+    Warning: "bg-blue-500"
+
+  };
+
+  const total = alarms.reduce(
+
+    (sum, item) => sum + item.value,
+
+    0
+
+  );
 
   return (
 
@@ -37,103 +33,104 @@ export default function PriorityChart() {
       <div className="mb-6">
 
         <h2 className="text-xl font-bold">
+
           Alarm Priority Distribution
+
         </h2>
 
         <p className="text-sm text-gray-500">
+
           Current operational alarm breakdown.
+
         </p>
 
       </div>
 
       <div className="space-y-5">
 
-        {alarms.map((alarm) => (
+        {
 
-          <div key={alarm.name}>
+          alarms.map((alarm) => (
 
-            <div className="flex justify-between mb-2">
+            <div key={alarm.name}>
 
-              <span className="font-medium">
+              <div className="flex justify-between mb-2">
 
-                {alarm.name}
+                <span className="font-medium">
 
-              </span>
+                  {alarm.name}
 
-              <span className="font-bold">
+                </span>
 
-                {alarm.value}
+                <span className="font-bold">
 
-              </span>
+                  {alarm.value}
+
+                </span>
+
+              </div>
+
+              <div className="w-full bg-gray-200 rounded-full h-3">
+
+                <div
+
+                  className={`${colors[alarm.name] || "bg-gray-500"} h-3 rounded-full transition-all duration-700`}
+
+                  style={{
+
+                    width:
+
+                      total === 0
+
+                        ? "0%"
+
+                        : `${(alarm.value / total) * 100}%`
+
+                  }}
+
+                />
+
+              </div>
 
             </div>
 
-            <div className="w-full bg-gray-200 rounded-full h-3">
+          ))
 
-              <div
-                className={`${alarm.color} h-3 rounded-full transition-all duration-700`}
-                style={{
-                  width: `${(alarm.value / total) * 100}%`
-                }}
-              />
-
-            </div>
-
-          </div>
-
-        ))}
+        }
 
       </div>
 
       <div className="grid grid-cols-2 gap-4 mt-8">
 
-        <div className="rounded-xl bg-red-50 p-4">
+        {
 
-          <p className="text-sm text-gray-500">
-            Critical
-          </p>
+          alarms.map((alarm) => (
 
-          <h3 className="text-2xl font-bold text-red-600">
-            11
-          </h3>
+            <div
 
-        </div>
+              key={alarm.name}
 
-        <div className="rounded-xl bg-orange-50 p-4">
+              className="rounded-xl bg-gray-50 p-4"
 
-          <p className="text-sm text-gray-500">
-            Major
-          </p>
+            >
 
-          <h3 className="text-2xl font-bold text-orange-600">
-            36
-          </h3>
+              <p className="text-sm text-gray-500">
 
-        </div>
+                {alarm.name}
 
-        <div className="rounded-xl bg-yellow-50 p-4">
+              </p>
 
-          <p className="text-sm text-gray-500">
-            Minor
-          </p>
+              <h3 className="text-2xl font-bold">
 
-          <h3 className="text-2xl font-bold text-yellow-600">
-            77
-          </h3>
+                {alarm.value}
 
-        </div>
+              </h3>
 
-        <div className="rounded-xl bg-green-50 p-4">
+            </div>
 
-          <p className="text-sm text-gray-500">
-            Acknowledged
-          </p>
+          ))
 
-          <h3 className="text-2xl font-bold text-green-700">
-            45
-          </h3>
-
-        </div>
+        }
 
       </div>
 

@@ -1,11 +1,26 @@
 import api from "./axios";
 
-export const getDashboard = () => api.get("/dashboard");
+export const uploadAlarmFile = async (file) => {
 
-export const getAlarms = () => api.get("/alarms");
+    const formData = new FormData();
 
-export const getReports = () => api.get("/reports");
+    formData.append("file", file);
 
-export const getIncidents = () => api.get("/incidents");
+    const response = await api.post(
 
-export const getAlarmTrends = () => api.get("/alarm-trends");
+        "/alarms/upload",
+
+        formData,
+
+        {
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+        }
+
+    );
+
+    // Return ONLY the processed dashboard
+    return response.data.dashboard;
+
+};
