@@ -1,11 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-
-  baseURL: "https://scadaalarm-filter.onrender.com",
-
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 1000000,
-
 });
 
 export default api;
