@@ -18,12 +18,22 @@ async def upload_alarm(file: UploadFile = File(...)):
     contents = await file.read()
 
     df = HistorianLoader.load(
-
         file.filename,
-
         contents
-
     )
+
+    # ============================================
+    # DEBUG INFORMATION
+    # ============================================
+
+    print("\n==============================")
+    print("Uploaded File:", file.filename)
+    print("Detected Columns:")
+    print(df.columns.tolist())
+    print("==============================\n")
+
+    # Optional: Preview first few rows
+    print(df.head())
 
     # ============================================
     # Process alarms
@@ -36,11 +46,7 @@ async def upload_alarm(file: UploadFile = File(...)):
     # ============================================
 
     return {
-
         "success": True,
-
         "filename": file.filename,
-
         "dashboard": dashboard
-
     }
